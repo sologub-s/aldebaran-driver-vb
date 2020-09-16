@@ -1,0 +1,9 @@
+C:\Users\User\Documents\Visual Studio 2010\Projects\ZeitGeist_Telescope\ZeitGeist_Telescope\obj\x64\Debug\ASCOM.ZeitGeist.eq5.Resources.resources
+C:\Users\User\Documents\Visual Studio 2010\Projects\ZeitGeist_Telescope\ZeitGeist_Telescope\obj\x64\Debug\ASCOM.ZeitGeist.eq5.SetupDialogForm.resources
+C:\Users\User\Documents\Visual Studio 2010\Projects\ZeitGeist_Telescope\ZeitGeist_Telescope\obj\x64\Debug\ZeitGeist_Telescope.vbproj.GenerateResource.Cache
+C:\Users\User\Documents\Visual Studio 2010\Projects\ZeitGeist_Telescope\ZeitGeist_Telescope\obj\x64\Debug\ASCOM.ZeitGeist.eq5.Telescope.dll
+C:\Users\User\Documents\Visual Studio 2010\Projects\ZeitGeist_Telescope\ZeitGeist_Telescope\obj\x64\Debug\ASCOM.ZeitGeist.eq5.Telescope.pdb
+C:\Users\User\Documents\Visual Studio 2010\Projects\ZeitGeist_Telescope\ZeitGeist_Telescope\bin\x64\Debug\ASCOM.ZeitGeist.eq5.Telescope.dll.config
+C:\Users\User\Documents\Visual Studio 2010\Projects\ZeitGeist_Telescope\ZeitGeist_Telescope\bin\x64\Debug\ASCOM.ZeitGeist.eq5.Telescope.dll
+C:\Users\User\Documents\Visual Studio 2010\Projects\ZeitGeist_Telescope\ZeitGeist_Telescope\bin\x64\Debug\ASCOM.ZeitGeist.eq5.Telescope.pdb
+C:\Users\User\Documents\Visual Studio 2010\Projects\ZeitGeist_Telescope\ZeitGeist_Telescope\bin\x64\Debug\ASCOM.ZeitGeist.eq5.Telescope.tlb
