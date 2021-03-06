@@ -94,6 +94,8 @@ Public Class Telescope
     Private property_slewing As Boolean = False
     Private property_tracking As Boolean = False
 
+    Private property_sideOfPier As PierSide = PierSide.pierUnknown
+
     '
     ' Constructor - Must be public for COM registration!
     '
@@ -226,6 +228,8 @@ Public Class Telescope
 
                 Tracking = followState
 
+                refreshSideOfPier()
+
             Else
                 connectedState = False
                 TL.LogMessage("Connected Set", "Disconnecting from port " + comPort)
@@ -299,10 +303,14 @@ Public Class Telescope
         Throw New ASCOM.MethodNotImplementedException("AbortSlew")
     End Sub
 
+    'The alignment mode of the mount (Alt/Az, Polar, German Polar).
     Public ReadOnly Property AlignmentMode() As AlignmentModes Implements ITelescopeV3.AlignmentMode
         Get
-            TL.LogMessage("AlignmentMode Get", "Not implemented")
-            Throw New ASCOM.PropertyNotImplementedException("AlignmentMode", False)
+            'TL.LogMessage("AlignmentMode Get", "Not implemented")
+            'Throw New ASCOM.PropertyNotImplementedException("AlignmentMode", False)
+            Dim value_alignmentMode = AlignmentModes.algGermanPolar
+            TL.LogMessage("AlignmentMode", "Get - " & value_alignmentMode.ToString())
+            Return value_alignmentMode
         End Get
     End Property
 
@@ -412,10 +420,13 @@ Public Class Telescope
         End Get
     End Property
 
+    'True if the SideOfPier property can be set, meaning that the mount can be forced to flip.
     Public ReadOnly Property CanSetPierSide() As Boolean Implements ITelescopeV3.CanSetPierSide
         Get
-            TL.LogMessage("CanSetPierSide", "Get - " & False.ToString())
-            Return False
+            'TL.LogMessage("CanSetPierSide", "Get - " & False.ToString())
+            'Return False
+            TL.LogMessage("CanSetPierSide", "Get - " & True.ToString())
+            Return True
         End Get
     End Property
 
@@ -505,9 +516,12 @@ Public Class Telescope
         End Set
     End Property
 
+    '@TODO: Implement
     Public Function DestinationSideOfPier(RightAscension As Double, Declination As Double) As PierSide Implements ITelescopeV3.DestinationSideOfPier
-        TL.LogMessage("DestinationSideOfPier Get", "Not implemented")
-        Throw New ASCOM.MethodNotImplementedException("DestinationSideOfPier")
+        'TL.LogMessage("DestinationSideOfPier Get", "Not implemented")
+        TL.LogMessage("DestinationSideOfPier Get", "Not implemented, returning current sideOfPier instead...")
+        'Throw New ASCOM.MethodNotImplementedException("DestinationSideOfPier")
+        Return property_sideOfPier
     End Function
 
     'True if the telescope or driver applies atmospheric refraction to coordinates.
@@ -524,6 +538,7 @@ Public Class Telescope
         End Set
     End Property
 
+    'Equatorial coordinate system used by this telescope (e.g. Topocentric or J2000).
     Public ReadOnly Property EquatorialSystem() As EquatorialCoordinateType Implements ITelescopeV3.EquatorialSystem
         Get
             Dim equatorialSystem__1 As EquatorialCoordinateType = EquatorialCoordinateType.equTopocentric
@@ -661,12 +676,32 @@ Public Class Telescope
     '@SEE https://ascom-standards.org/Help/Platform/html/P_ASCOM_DeviceInterface_ITelescopeV3_SideOfPier.htm
     Public Property SideOfPier() As PierSide Implements ITelescopeV3.SideOfPier
         Get
-            TL.LogMessage("SideOfPier Get", "Not implemented")
-            Throw New ASCOM.PropertyNotImplementedException("SideOfPier", False)
+            'TL.LogMessage("SideOfPier Get", "Not implemented")
+            refreshSideOfPier()
+            TL.LogMessage("SideOfPier", "Get - " & property_sideOfPier.ToString())
         End Get
         Set(value As PierSide)
-            TL.LogMessage("SideOfPier Set", "Not implemented")
-            Throw New ASCOM.PropertyNotImplementedException("SideOfPier", True)
+            'TL.LogMessage("SideOfPier Set", "Not implemented")
+            'Throw New ASCOM.PropertyNotImplementedException("SideOfPier", True)
+
+            'SET_DEC_WARD
+            Dim commandString = "SET_DEC_WARD=" + If(value = PierSide.pierEast, "w", "e") + "#"
+
+            TL.LogMessage("SideOfPier Set -> ", commandString)
+
+            objSerial.ClearBuffers()
+            objSerial.Transmit(commandString)
+            objSerial.ClearBuffers()
+
+            Dim serialResponse As String
+            serialResponse = objSerial.ReceiveTerminated("#")
+            serialResponse = serialResponse.Replace("#", "")
+            serialResponse = serialResponse.Replace(vbLf, "")
+            serialResponse = serialResponse.Replace(vbCr, "")
+            serialResponse = serialResponse.Replace(vbCrLf, "")
+            serialResponse = serialResponse.Replace(vbNewLine, "")
+            TL.LogMessage("SideOfPier Set <- ", serialResponse)
+            refreshSideOfPier()
         End Set
     End Property
 
@@ -1098,11 +1133,35 @@ Public Class Telescope
         serialResponse = serialResponse.Replace(vbCr, "")
         serialResponse = serialResponse.Replace(vbCrLf, "")
         serialResponse = serialResponse.Replace(vbNewLine, "")
-        TL.LogMessage("refreshSlewing: ", serialResponse)
+        TL.LogMessage("refreshSlewing <- ", serialResponse)
 
         Dim responseArray() As String = Split(serialResponse, "=")
 
         property_slewing = If((responseArray(1) = "1"), True, False)
+    End Sub
+
+    Private Sub refreshSideOfPier()
+        'GET_DEC_WARD
+        Dim commandString = "GET_DEC_WARD" + "#"
+
+        TL.LogMessage("refreshSideOfPier -> ", commandString)
+
+        objSerial.ClearBuffers()
+        objSerial.Transmit(commandString)
+        objSerial.ClearBuffers()
+
+        Dim serialResponse As String
+        serialResponse = objSerial.ReceiveTerminated("#")
+        serialResponse = serialResponse.Replace("#", "")
+        serialResponse = serialResponse.Replace(vbLf, "")
+        serialResponse = serialResponse.Replace(vbCr, "")
+        serialResponse = serialResponse.Replace(vbCrLf, "")
+        serialResponse = serialResponse.Replace(vbNewLine, "")
+        TL.LogMessage("refreshSideOfPier <- ", serialResponse)
+
+        Dim responseArray() As String = Split(serialResponse, "=")
+
+        property_sideOfPier = If((responseArray(1) = "e"), PierSide.pierWest, PierSide.pierEast)
     End Sub
 
 #End Region
