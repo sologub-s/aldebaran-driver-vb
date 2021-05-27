@@ -96,6 +96,8 @@ Public Class Telescope
 
     Private property_sideOfPier As PierSide = PierSide.pierUnknown
 
+    Private property_isPulseGuiding As Boolean = False
+
     '
     ' Constructor - Must be public for COM registration!
     '
@@ -586,7 +588,7 @@ Public Class Telescope
         Get
             'TL.LogMessage("IsPulseGuiding Get", "Not implemented")
             'Throw New ASCOM.PropertyNotImplementedException("IsPulseGuiding", False)
-            Return isGuidingNow
+            Return property_isPulseGuiding
         End Get
     End Property
 
@@ -606,43 +608,46 @@ Public Class Telescope
     ' Duration is in milliseconds
     Public Sub PulseGuide(Direction As GuideDirections, Duration As Integer) Implements ITelescopeV3.PulseGuide
 
-        TL.LogMessage("PulseGuide started, Direction ", Duration.ToString)
-        TL.LogMessage("PulseGuide started, Duration ", Duration.ToString)
+        TL.LogMessage("PulseGuide", "Direction: " & Direction.ToString & " ; Duration: " & Duration.ToString)
 
-        isGuidingNow = True
+        property_isPulseGuiding = True
 
         Dim guideDirection As String = ""
 
         If Direction = GuideDirections.guideNorth Then
-            guideDirection = "0"
+            guideDirection = "NORTH"
         End If
 
         If Direction = GuideDirections.guideSouth Then
-            guideDirection = "1"
+            guideDirection = "SOUTH"
         End If
 
         If Direction = GuideDirections.guideEast Then
-            guideDirection = "2"
+            guideDirection = "EAST"
         End If
 
         If Direction = GuideDirections.guideWest Then
-            guideDirection = "3"
+            guideDirection = "WEST"
         End If
 
-        'Dim commandString = "GUIDE_" + Direction.ToString() + "_" + Duration.ToString
-        Dim commandString = "GUIDE_" + guideDirection + "_" + Duration.ToString
-        commandString = commandString + "#"
+        Dim commandString = "GUIDE_" + guideDirection + "=" + Duration.ToString + "#"
 
-        My.Application.Log.WriteEntry("Going to send to Serial port: " & commandString)
+        TL.LogMessage("PulseGuide -> ", commandString)
 
+        objSerial.ClearBuffers()
         objSerial.Transmit(commandString)
+        objSerial.ClearBuffers()
 
         Dim serialResponse As String
         serialResponse = objSerial.ReceiveTerminated("#")
         serialResponse = serialResponse.Replace("#", "")
-        TL.LogMessage("PulseGuide response ", serialResponse)
+        serialResponse = serialResponse.Replace(vbLf, "")
+        serialResponse = serialResponse.Replace(vbCr, "")
+        serialResponse = serialResponse.Replace(vbCrLf, "")
+        serialResponse = serialResponse.Replace(vbNewLine, "")
+        TL.LogMessage("PulseGuide <- ", serialResponse)
 
-        isGuidingNow = False
+        property_isPulseGuiding = False
 
     End Sub
 

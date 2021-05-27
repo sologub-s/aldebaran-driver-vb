@@ -1,1 +1,0 @@
-%Windir%\Microsoft.NET\Framework\v4.0.30319\regasm.exe -u "ASCOM.ZeitGeist.eq5.Telescope.dll"
