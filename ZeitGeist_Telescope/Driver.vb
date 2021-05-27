@@ -280,7 +280,7 @@ Public Class Telescope
 
     Public ReadOnly Property Name As String Implements ITelescopeV3.Name
         Get
-            Dim s_name As String = "Short driver name - please customise"
+            Dim s_name As String = "ZeitGeist's Aldebaran-EQ5 Driver"
             TL.LogMessage("Name Get", s_name)
             Return s_name
         End Get
@@ -374,11 +374,11 @@ Public Class Telescope
         TL.LogMessage("CanMoveAxis", "Get - " & Axis.ToString())
         Select Case Axis
             Case TelescopeAxes.axisPrimary
-                Return False
+                Return True ' RA
             Case TelescopeAxes.axisSecondary
-                Return False
+                Return True ' DEC
             Case TelescopeAxes.axisTertiary
-                Return False
+                Return False ' ROT
             Case Else
                 Throw New InvalidValueException("CanMoveAxis", Axis.ToString(), "0 to 2")
         End Select
@@ -593,8 +593,51 @@ Public Class Telescope
     End Property
 
     Public Sub MoveAxis(Axis As TelescopeAxes, Rate As Double) Implements ITelescopeV3.MoveAxis
-        TL.LogMessage("MoveAxis", "Not implemented")
-        Throw New ASCOM.MethodNotImplementedException("MoveAxis")
+        'TL.LogMessage("MoveAxis", "Not implemented")
+        TL.LogMessage("MoveAxis", "Axis: " & Axis.ToString & " ; Rate: " & Rate.ToString)
+        'Throw New ASCOM.MethodNotImplementedException("MoveAxis")
+
+        Dim axisCommand = "SLEW_"
+        Select Case Axis
+            Case TelescopeAxes.axisPrimary
+                axisCommand += "RA"
+            Case TelescopeAxes.axisSecondary
+                axisCommand += "DEC"
+            Case TelescopeAxes.axisTertiary
+                Throw New InvalidValueException("CanMoveAxis", Axis.ToString(), "no rotator")
+            Case Else
+                Throw New InvalidValueException("CanMoveAxis", Axis.ToString(), "0 to 2")
+        End Select
+
+        Dim axisDirection As Integer = 0
+
+        If Rate > 0 Then
+            axisDirection = 1
+        ElseIf Rate < 0 Then
+            axisDirection = -1
+        End If
+
+        If property_sideOfPier = PierSide.pierEast Then
+            axisDirection *= -1
+        End If
+
+        Dim commandString = axisCommand + "=" + axisDirection.ToString + "#"
+
+        TL.LogMessage("MoveAxis -> ", commandString)
+
+        objSerial.ClearBuffers()
+        objSerial.Transmit(commandString)
+        objSerial.ClearBuffers()
+
+        Dim serialResponse As String
+        serialResponse = objSerial.ReceiveTerminated("#")
+        serialResponse = serialResponse.Replace("#", "")
+        serialResponse = serialResponse.Replace(vbLf, "")
+        serialResponse = serialResponse.Replace(vbCr, "")
+        serialResponse = serialResponse.Replace(vbCrLf, "")
+        serialResponse = serialResponse.Replace(vbNewLine, "")
+        TL.LogMessage("MoveAxis <- ", serialResponse)
+
     End Sub
 
     Public Sub Park() Implements ITelescopeV3.Park
@@ -684,6 +727,7 @@ Public Class Telescope
             'TL.LogMessage("SideOfPier Get", "Not implemented")
             refreshSideOfPier()
             TL.LogMessage("SideOfPier", "Get - " & property_sideOfPier.ToString())
+            Return property_sideOfPier
         End Get
         Set(value As PierSide)
             'TL.LogMessage("SideOfPier Set", "Not implemented")

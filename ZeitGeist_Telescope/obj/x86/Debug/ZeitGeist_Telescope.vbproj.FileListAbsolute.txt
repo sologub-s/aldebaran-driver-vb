@@ -7,3 +7,4 @@ C:\Users\User\Documents\Visual Studio 2010\Projects\ZeitGeist_Telescope\ZeitGeis
 C:\Users\User\Documents\Visual Studio 2010\Projects\ZeitGeist_Telescope\ZeitGeist_Telescope\obj\x86\Debug\ZeitGeist_Telescope.vbproj.GenerateResource.Cache
 C:\Users\User\Documents\Visual Studio 2010\Projects\ZeitGeist_Telescope\ZeitGeist_Telescope\obj\x86\Debug\ASCOM.ZeitGeist.eq5.Telescope.dll
 C:\Users\User\Documents\Visual Studio 2010\Projects\ZeitGeist_Telescope\ZeitGeist_Telescope\obj\x86\Debug\ASCOM.ZeitGeist.eq5.Telescope.pdb
+C:\Users\User\Documents\Visual Studio 2010\Projects\ZeitGeist_Telescope\ZeitGeist_Telescope\obj\x86\Debug\ZeitGeist_Telescope.vbprojResolveAssemblyReference.cache
